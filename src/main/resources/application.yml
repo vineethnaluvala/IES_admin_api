@@ -1,0 +1,21 @@
+
+spring:
+  datasource:
+    username: nani
+    password: nani
+    url: jdbc:mysql://localhost:3306/IES
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  application:
+    name: REST-API
+        
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+server:
+  port: 8086
+ 

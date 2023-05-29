@@ -11,6 +11,8 @@ import in.vini.entity.CaseWorkerEntity;
 import in.vini.entity.PlanEntity;
 import in.vini.repo.CaseWorkerRepository;
 import in.vini.repo.PlanEntityRepository;
+import in.vini.utils.EmailUtils;
+import in.vini.utils.PwdUtils;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -20,6 +22,9 @@ public class AdminServiceImpl implements AdminService {
 	@Autowired
 	private PlanEntityRepository planRepo;
 
+	@Autowired
+	private EmailUtils utils;
+
 	public boolean createAccount(CaseWorkerEntity cwEntity) {
 
 		CaseWorkerEntity findByMail = cwRepo.findByMail(cwEntity.getMail());
@@ -28,8 +33,24 @@ public class AdminServiceImpl implements AdminService {
 		}
 		CaseWorkerEntity entity = new CaseWorkerEntity();
 		BeanUtils.copyProperties(cwEntity, entity);
-		entity.setAccStatus("inactive");
+		String generatePwd = PwdUtils.generatePwd();
+		entity.setPwd(generatePwd);
 		cwRepo.save(entity);
+
+		String to = cwEntity.getMail();
+
+		String subject = "change your password";
+
+		StringBuilder body = new StringBuilder();
+
+		body.append("use below temparory password to change your password");
+
+		body.append("temparory password : " + generatePwd);
+
+		body.append("<a href =\"http://localhost:8087/reset?pwd=" + to + "\">click here to change your password</a>");
+
+		utils.sendMail(to, subject, body.toString());
+
 		return true;
 	}
 
@@ -40,45 +61,44 @@ public class AdminServiceImpl implements AdminService {
 		return view;
 	}
 
-	public boolean editAccount(CaseWorkerEntity cwEntity) {
+	public boolean editAccount(Integer id, CaseWorkerEntity cwEntity) {
 
-		Optional<CaseWorkerEntity> findById = cwRepo.findById(cwEntity.getCid());
+		Optional<CaseWorkerEntity> findById = cwRepo.findById(id);
+
 		if (findById.isPresent()) {
 			CaseWorkerEntity caseWorkerEntity = findById.get();
-
-			if (caseWorkerEntity == null) {
-				return false;
-			}
-			CaseWorkerEntity entity = new CaseWorkerEntity();
-			BeanUtils.copyProperties(cwEntity, entity);
-
-			cwRepo.save(entity);
-
+			caseWorkerEntity.setName(cwEntity.getName());
+			caseWorkerEntity.setMail(cwEntity.getMail());
+			caseWorkerEntity.setPhno(cwEntity.getPhno());
+			caseWorkerEntity.setGender(cwEntity.getGender());
+			caseWorkerEntity.setDob(cwEntity.getDob());
+			caseWorkerEntity.setSsn(cwEntity.getSsn());
+			caseWorkerEntity.setAccStatus(cwEntity.getAccStatus());
+			caseWorkerEntity.setRole(cwEntity.getRole());
+			cwRepo.save(caseWorkerEntity);
 			return true;
 		}
-
 		return false;
 	}
 
 	public boolean createPlan(PlanEntity pEntity) {
-
 		PlanEntity planEntity = new PlanEntity();
 		BeanUtils.copyProperties(pEntity, planEntity);
 		planRepo.save(planEntity);
 		return true;
 	}
 
-	public boolean editPlan(PlanEntity pEntity) {
-		Optional<PlanEntity> findById = planRepo.findById(pEntity.getPid());
+	public boolean editPlan(Integer id, PlanEntity pEntity) {
+		Optional<PlanEntity> findById = planRepo.findById(id);
 		if (findById.isPresent()) {
 			PlanEntity planEntity = findById.get();
-			if (planEntity == null) {
-				return false;
-			}
 
-			PlanEntity entity = new PlanEntity();
-			BeanUtils.copyProperties(pEntity, entity);
-			planRepo.save(entity);
+			planEntity.setName(pEntity.getName());
+			planEntity.setAccStatus(pEntity.getAccStatus());
+			planEntity.setStartDate(pEntity.getStartDate());
+			pEntity.setEndDate(pEntity.getEndDate());
+
+			planRepo.save(planEntity);
 			return true;
 		}
 		return false;
@@ -89,6 +109,24 @@ public class AdminServiceImpl implements AdminService {
 		List<PlanEntity> view = planRepo.findAll();
 
 		return view;
+	}
+
+	@Override
+	public String getDashboardData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String createApplication() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String viewApplications() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,12 +56,13 @@ public class AdminRestController {
 		}
 	}
 
-	@PostMapping("/edit-cw-account")
-	public ResponseEntity<CaseWorkerEntity> editCWAcc(@RequestBody CaseWorkerEntity cEntity) {
+	@PostMapping("/edit-cw-account/{id}")
+	public ResponseEntity<CaseWorkerEntity> editCWAcc(@PathVariable("id") Integer id,
+			@RequestBody CaseWorkerEntity cEntity) {
 
 		try {
 
-			boolean editAccount = adminService.editAccount(cEntity);
+			boolean editAccount = adminService.editAccount(id, cEntity);
 			if (editAccount) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
@@ -101,10 +103,10 @@ public class AdminRestController {
 		}
 	}
 
-	@PostMapping("/edit-plan")
-	public ResponseEntity<PlanEntity> editPlan(@RequestBody PlanEntity pEntity) {
+	@PostMapping("/edit-plan/{id}")
+	public ResponseEntity<PlanEntity> editPlan(@PathVariable("id") Integer id, @RequestBody PlanEntity pEntity) {
 		try {
-			boolean editPlan = adminService.editPlan(pEntity);
+			boolean editPlan = adminService.editPlan(id, pEntity);
 			if (editPlan) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}

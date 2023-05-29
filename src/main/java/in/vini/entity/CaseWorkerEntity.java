@@ -22,4 +22,5 @@ public class CaseWorkerEntity {
 	private String ssn;
 	private String accStatus;
 	private String role;
+	private String pwd;
 }

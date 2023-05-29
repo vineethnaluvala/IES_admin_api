@@ -11,12 +11,18 @@ public interface AdminService {
 	
 	public List<CaseWorkerEntity> viewAccounts();
 	
-	public boolean editAccount(CaseWorkerEntity cwEntity);
+	public boolean editAccount(Integer id,CaseWorkerEntity cid);
 
 	public boolean createPlan(PlanEntity pEntity);
 	
 	public List<PlanEntity> viewPlans();
 	
-	public boolean editPlan(PlanEntity pEntity);
+	public boolean editPlan(Integer id,PlanEntity pid);
+	
+	public String getDashboardData();
+	
+	public String createApplication();
+	
+	public String viewApplications();
 
 }

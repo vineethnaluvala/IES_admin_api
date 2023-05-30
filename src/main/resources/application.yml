@@ -18,8 +18,8 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
       
   mail:
-    username: vineethyadavnaluvala023@gmail.com
-    password: bmkmuguhxsulpdel
+    username: xyz@gmail.com
+    password: xyz@123
     
     host: smtp.gmail.com
     port: 587

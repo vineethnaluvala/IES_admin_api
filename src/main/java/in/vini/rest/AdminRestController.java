@@ -13,8 +13,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import in.vini.entity.ApplicationEntity;
 import in.vini.entity.CaseWorkerEntity;
+import in.vini.entity.DashBoardEntity;
 import in.vini.entity.PlanEntity;
+import in.vini.request.AdminCw;
+import in.vini.request.ApplicationRequest;
+import in.vini.request.PlanRequest;
+import in.vini.response.ApplicationResponse;
+import in.vini.response.CwResponse;
 import in.vini.service.AdminServiceImpl;
 
 @RestController
@@ -26,11 +33,11 @@ public class AdminRestController {
 	private AdminServiceImpl adminService;
 
 	@PostMapping("/create-cw-account")
-	public ResponseEntity<CaseWorkerEntity> createCWAccount(@RequestBody CaseWorkerEntity entity) {
+	public ResponseEntity<CwResponse> createCWAccount(@RequestBody AdminCw adminCw) {
 
 		try {
 
-			boolean createAccount = adminService.createAccount(entity);
+			boolean createAccount = adminService.createAccount(adminCw);
 			if (createAccount) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
@@ -44,11 +51,16 @@ public class AdminRestController {
 
 	}
 
-	@GetMapping("/view-accounts")
+	@GetMapping("/view-cw-accounts")
 	public ResponseEntity<List<CaseWorkerEntity>> viewAccounts() {
 
 		try {
 			List<CaseWorkerEntity> viewAccounts = adminService.viewAccounts();
+
+			for (CaseWorkerEntity entity : viewAccounts) {
+				entity.setPwd(null);
+			}
+
 			return new ResponseEntity<>(viewAccounts, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("error occurred while retrieving accounts: ", e.getMessage());
@@ -76,10 +88,10 @@ public class AdminRestController {
 	}
 
 	@PostMapping("/create-plan")
-	public ResponseEntity<PlanEntity> createPlan(@RequestBody PlanEntity pEntity) {
+	public ResponseEntity<PlanEntity> createPlan(@RequestBody PlanRequest pReq) {
 
 		try {
-			boolean createPlan = adminService.createPlan(pEntity);
+			boolean createPlan = adminService.createPlan(pReq);
 			if (createPlan) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
@@ -96,7 +108,7 @@ public class AdminRestController {
 
 		try {
 			List<PlanEntity> viewPlans = adminService.viewPlans();
-			return new ResponseEntity<>(viewPlans, HttpStatus.OK);
+			return new ResponseEntity<>(viewPlans, HttpStatus.CREATED);
 		} catch (Exception e) {
 			logger.error("error occurred while retrieving plans: ", e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -117,4 +129,43 @@ public class AdminRestController {
 		}
 
 	}
+
+	@GetMapping("/dashboard-data")
+	public ResponseEntity<List<DashBoardEntity>> dashboardData() {
+
+		List<DashBoardEntity> dashboardData = adminService.getDashboardData();
+
+		return new ResponseEntity<>(dashboardData, HttpStatus.CREATED);
+
+	}
+
+	@PostMapping("/create-applications")
+	public ResponseEntity<ApplicationResponse> createApplication(@RequestBody ApplicationRequest applicationReq) {
+
+		try {
+			String createApplication = adminService.createApplication(applicationReq);
+
+			if (createApplication.contains("success")) {
+
+				return new ResponseEntity<>(HttpStatus.CREATED);
+
+			}
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error("error occured while creating application : ", e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
+
+	}
+
+	@GetMapping("/view-applications")
+	public ResponseEntity<List<ApplicationEntity>> viewApplications() {
+
+		List<ApplicationEntity> viewApplications = adminService.viewApplications();
+
+		return new ResponseEntity<>(viewApplications, HttpStatus.CREATED);
+
+	}
+
 }

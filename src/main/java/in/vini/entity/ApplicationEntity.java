@@ -9,19 +9,17 @@ import lombok.Data;
 
 @Entity
 @Data
-public class CaseWorkerEntity {
+public class ApplicationEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer cid;
+	private Integer aid;
 	private String name;
+	private Integer caseNo;
 	private String mail;
 	private String phno;
 	private String gender;
 	private String dob;
 	private String ssn;
-	private String accStatus;
-	private String role;
-	private String pwd;
 
 }

@@ -9,19 +9,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import in.vini.entity.AdminEntity;
-import in.vini.entity.ApplicationEntity;
-import in.vini.entity.CaseWorkerEntity;
-import in.vini.entity.DashBoardEntity;
 import in.vini.entity.PlanEntity;
-import in.vini.repo.AdminRepository;
-import in.vini.repo.ApplicationRepository;
-import in.vini.repo.CaseWorkerRepository;
-import in.vini.repo.DashboardRepository;
+import in.vini.entity.UserEntity;
+import in.vini.repo.IESUserRolesRepository;
 import in.vini.repo.PlanEntityRepository;
-import in.vini.request.AdminCw;
-import in.vini.request.ApplicationRequest;
+import in.vini.repo.UserRepository;
 import in.vini.request.PlanRequest;
+import in.vini.request.UserRequest;
 import in.vini.utils.EmailUtils;
 import in.vini.utils.PwdUtils;
 
@@ -31,151 +25,111 @@ public class AdminServiceImpl implements AdminService {
 	private Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
 	@Autowired
-	private CaseWorkerRepository cwRepo;
+	private UserRepository userRepo;
 	@Autowired
-	private PlanEntityRepository planRepo;
+	private PlanEntityRepository plansRepo;
 	@Autowired
-	private AdminRepository adminRepo;
-	@Autowired
-	private DashboardRepository dashBoardRepo;
-	@Autowired
-	private ApplicationRepository appRepo;
+	private IESUserRolesRepository rolesRepo;
+
 	@Autowired
 	private EmailUtils utils;
 
-	public boolean createAccount(AdminCw adminCw) {
-
+	public String createAccount(UserRequest user) {
+		UserEntity entity = new UserEntity();
 		try {
-			AdminEntity findByEmailAndPzwd = adminRepo.findByEmailAndPzwd(adminCw.getAdminReq().getEmail(),
-					adminCw.getAdminReq().getPzwd());
 
-			if (findByEmailAndPzwd != null) {
-				CaseWorkerEntity findByMail = cwRepo.findByMail(adminCw.getCwReq().getMail());
-				if (findByMail != null) {
-					return false;
-				}
-				CaseWorkerEntity entity = new CaseWorkerEntity();
-				BeanUtils.copyProperties(adminCw.getCwReq(), entity);
-				entity.setAccStatus("inactive");
-				entity.setRole("caseworker");
-				String generatePwd = PwdUtils.generatePwd();
-				entity.setPwd(generatePwd);
-				cwRepo.save(entity);
+			UserEntity findByUserMail = userRepo.findByUserMail(user.getUserMail());
 
-				String to = adminCw.getCwReq().getMail();
-
-				String subject = "change your password";
-
-				StringBuilder body = new StringBuilder();
-
-				body.append("  your email : " + to);
-
-				body.append("  temparory password : " + generatePwd);
-
-				body.append("  http://localhost:8087/reset?pwdclick here to change your password");
-
-				utils.sendMail(to, subject, body.toString());
-
-				return true;
+			if (findByUserMail != null) {
+				return "email already exist";
 			}
-			return false;
+
+			BeanUtils.copyProperties(user, entity);
+			String generatePwd = PwdUtils.generatePwd();
+			entity.setUserPwd(generatePwd);
+			userRepo.save(entity);
+
+			String to = user.getUserMail();
+
+			String subject = "change your password";
+
+			StringBuilder body = new StringBuilder();
+
+			body.append("  your email : " + to);
+
+			body.append("  temparory password : " + generatePwd);
+
+			body.append("  http://localhost:8087/reset?pwdclick here to change your password");
+
+			utils.sendMail(to, subject, body.toString());
+
+			return "account creation success";
+
 		} catch (Exception e) {
-			logger.error("error occured while creating account" + e.getMessage());
+			logger.error(e.getMessage());
+
+			return "error occured while creating account";
 		}
-		return false;
-
 	}
 
-	public List<CaseWorkerEntity> viewAccounts() {
+	@Override
+	public boolean editAccount(Integer id, UserRequest userReq) {
 
-		List<CaseWorkerEntity> view = cwRepo.findAll();
-
-		return view;
-	}
-
-	public boolean editAccount(Integer id, CaseWorkerEntity cwEntity) {
-
-		Optional<CaseWorkerEntity> findById = cwRepo.findById(id);
+		Optional<UserEntity> findById = userRepo.findById(id);
 
 		if (findById.isPresent()) {
-			CaseWorkerEntity caseWorkerEntity = findById.get();
-			caseWorkerEntity.setName(cwEntity.getName());
-			caseWorkerEntity.setMail(cwEntity.getMail());
-			caseWorkerEntity.setPhno(cwEntity.getPhno());
-			caseWorkerEntity.setGender(cwEntity.getGender());
-			caseWorkerEntity.setDob(cwEntity.getDob());
-			caseWorkerEntity.setSsn(cwEntity.getSsn());
-			caseWorkerEntity.setAccStatus(cwEntity.getAccStatus());
-			caseWorkerEntity.setRole(cwEntity.getRole());
-			cwRepo.save(caseWorkerEntity);
+			UserEntity userEntity = findById.get();
+			userEntity.setUserName(userReq.getUserName());
+			userEntity.setUserMail(userReq.getUserMail());
+			userEntity.setUserPhno(userReq.getUserPhno());
+			userEntity.setUserDob(userReq.getUserDob());
+			userEntity.setUserGender(userReq.getUserGender());
+			userEntity.setUserSsn(userReq.getUserSsn());
+			userRepo.save(userEntity);
 			return true;
 		}
 		return false;
 	}
 
-	public boolean createPlan(PlanRequest pReq) {
+	@Override
+	public List<UserEntity> viewAccounts() {
+
+		List<UserEntity> users = userRepo.findAll();
+
+		return users;
+	}
+
+	@Override
+
+	public boolean createPlan(PlanRequest planReq) {
 		PlanEntity planEntity = new PlanEntity();
-		BeanUtils.copyProperties(pReq, planEntity);
-		planEntity.setAccStatus("inactive");
-		planRepo.save(planEntity);
+		BeanUtils.copyProperties(planReq, planEntity);
+		plansRepo.save(planEntity);
 		return true;
-	}
 
-	public boolean editPlan(Integer id, PlanEntity pEntity) {
-		Optional<PlanEntity> findById = planRepo.findById(id);
-		if (findById.isPresent()) {
-			PlanEntity planEntity = findById.get();
-
-			planEntity.setName(pEntity.getName());
-			planEntity.setAccStatus(pEntity.getAccStatus());
-			planEntity.setStartDate(pEntity.getStartDate());
-			pEntity.setEndDate(pEntity.getEndDate());
-
-			planRepo.save(planEntity);
-			return true;
-		}
-		return false;
 	}
 
 	@Override
 	public List<PlanEntity> viewPlans() {
-		List<PlanEntity> view = planRepo.findAll();
+		List<PlanEntity> plans = plansRepo.findAll();
 
-		return view;
+		return plans;
 	}
 
 	@Override
-	public List<DashBoardEntity> getDashboardData() {
+	public boolean editPlan(Integer id, PlanRequest planReq) {
+		Optional<PlanEntity> findById = plansRepo.findById(id);
+		if (findById.isPresent()) {
+			PlanEntity planEntity = findById.get();
 
-		List<DashBoardEntity> dashboardData = dashBoardRepo.findAll();
-
-		return dashboardData;
-	}
-
-	private Integer caseNo = 2158;
-
-	public String createApplication(ApplicationRequest applicationReq) {
-
-		try {
-			ApplicationEntity entity = new ApplicationEntity();
-			BeanUtils.copyProperties(applicationReq, entity);
-			entity.setCaseNo(caseNo);
-			appRepo.save(entity);
-			caseNo++;
-			return "success";
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return "application failed to created";
+			planEntity.setPlaneName(planReq.getPlaneName());
+			planEntity.setPlanStartDate(planReq.getPlanStartDate());
+			planEntity.setPlanEndDate(planReq.getPlanEndDate());
+			planEntity.setPlanCategory(planReq.getPlanCategory());
+			
+			plansRepo.save(planEntity);
+			return true;
 		}
-
+		return false;
 	}
-
-	@Override
-	public List<ApplicationEntity> viewApplications() {
-
-		List<ApplicationEntity> viewApplications = appRepo.findAll();
-
-		return viewApplications;
-	}
-
 }

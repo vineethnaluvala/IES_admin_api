@@ -13,15 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import in.vini.entity.ApplicationEntity;
-import in.vini.entity.CaseWorkerEntity;
-import in.vini.entity.DashBoardEntity;
 import in.vini.entity.PlanEntity;
-import in.vini.request.AdminCw;
-import in.vini.request.ApplicationRequest;
+import in.vini.entity.UserEntity;
 import in.vini.request.PlanRequest;
-import in.vini.response.ApplicationResponse;
-import in.vini.response.CwResponse;
+import in.vini.request.UserRequest;
+import in.vini.response.PlanResponse;
+import in.vini.response.UserResponse;
 import in.vini.service.AdminServiceImpl;
 
 @RestController
@@ -32,13 +29,14 @@ public class AdminRestController {
 	@Autowired
 	private AdminServiceImpl adminService;
 
-	@PostMapping("/create-cw-account")
-	public ResponseEntity<CwResponse> createCWAccount(@RequestBody AdminCw adminCw) {
+	@PostMapping("/create-account")
+	public ResponseEntity<UserResponse> createUserAccount(@RequestBody UserRequest userReq) {
 
 		try {
 
-			boolean createAccount = adminService.createAccount(adminCw);
-			if (createAccount) {
+			String createAccount = adminService.createAccount(userReq);
+
+			if (createAccount.contains("account creation success")) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -51,14 +49,14 @@ public class AdminRestController {
 
 	}
 
-	@GetMapping("/view-cw-accounts")
-	public ResponseEntity<List<CaseWorkerEntity>> viewAccounts() {
+	@GetMapping("/view-accounts")
+	public ResponseEntity<List<UserEntity>> viewAccounts() {
 
 		try {
-			List<CaseWorkerEntity> viewAccounts = adminService.viewAccounts();
+			List<UserEntity> viewAccounts = adminService.viewAccounts();
 
-			for (CaseWorkerEntity entity : viewAccounts) {
-				entity.setPwd(null);
+			for (UserEntity entity : viewAccounts) {
+				entity.setUserPwd(null);
 			}
 
 			return new ResponseEntity<>(viewAccounts, HttpStatus.OK);
@@ -68,13 +66,12 @@ public class AdminRestController {
 		}
 	}
 
-	@PostMapping("/edit-cw-account/{id}")
-	public ResponseEntity<CaseWorkerEntity> editCWAcc(@PathVariable("id") Integer id,
-			@RequestBody CaseWorkerEntity cEntity) {
+	@PostMapping("/edit-account/{id}")
+	public ResponseEntity<UserEntity> editAccount(@PathVariable("id") Integer id, @RequestBody UserRequest userReq) {
 
 		try {
 
-			boolean editAccount = adminService.editAccount(id, cEntity);
+			boolean editAccount = adminService.editAccount(id, userReq);
 			if (editAccount) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
@@ -88,10 +85,10 @@ public class AdminRestController {
 	}
 
 	@PostMapping("/create-plan")
-	public ResponseEntity<PlanEntity> createPlan(@RequestBody PlanRequest pReq) {
+	public ResponseEntity<PlanResponse> createPlan(@RequestBody PlanRequest planReq) {
 
 		try {
-			boolean createPlan = adminService.createPlan(pReq);
+			boolean createPlan = adminService.createPlan(planReq);
 			if (createPlan) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
@@ -116,9 +113,9 @@ public class AdminRestController {
 	}
 
 	@PostMapping("/edit-plan/{id}")
-	public ResponseEntity<PlanEntity> editPlan(@PathVariable("id") Integer id, @RequestBody PlanEntity pEntity) {
+	public ResponseEntity<PlanEntity> editPlan(@PathVariable("id") Integer id, @RequestBody PlanRequest planReq) {
 		try {
-			boolean editPlan = adminService.editPlan(id, pEntity);
+			boolean editPlan = adminService.editPlan(id, planReq);
 			if (editPlan) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
@@ -127,44 +124,6 @@ public class AdminRestController {
 			logger.error("error occured while updating plan : ", e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-	}
-
-	@GetMapping("/dashboard-data")
-	public ResponseEntity<List<DashBoardEntity>> dashboardData() {
-
-		List<DashBoardEntity> dashboardData = adminService.getDashboardData();
-
-		return new ResponseEntity<>(dashboardData, HttpStatus.CREATED);
-
-	}
-
-	@PostMapping("/create-applications")
-	public ResponseEntity<ApplicationResponse> createApplication(@RequestBody ApplicationRequest applicationReq) {
-
-		try {
-			String createApplication = adminService.createApplication(applicationReq);
-
-			if (createApplication.contains("success")) {
-
-				return new ResponseEntity<>(HttpStatus.CREATED);
-
-			}
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			logger.error("error occured while creating application : ", e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-		}
-
-	}
-
-	@GetMapping("/view-applications")
-	public ResponseEntity<List<ApplicationEntity>> viewApplications() {
-
-		List<ApplicationEntity> viewApplications = adminService.viewApplications();
-
-		return new ResponseEntity<>(viewApplications, HttpStatus.CREATED);
 
 	}
 

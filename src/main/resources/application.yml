@@ -2,7 +2,7 @@ spring:
   datasource:
     username: nani
     password: nani
-    url: jdbc:mysql://localhost:3306/IES
+    url: jdbc:mysql://localhost:3306/ies
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -18,8 +18,8 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
       
   mail:
-    username: xyz@gmail.com
-    password: xyz@123
+    username: abc@gmail.com
+    password: abc
     
     host: smtp.gmail.com
     port: 587
@@ -32,19 +32,3 @@ spring:
             enable: true
 server:
   port: 8087
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-  

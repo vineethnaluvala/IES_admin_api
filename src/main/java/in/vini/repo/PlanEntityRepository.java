@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import in.vini.entity.PlanEntity;
 
-public interface PlanEntityRepository extends JpaRepository<PlanEntity, Integer>{
+public interface PlanEntityRepository extends JpaRepository<PlanEntity, Integer> {
 
 }

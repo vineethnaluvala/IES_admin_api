@@ -1,14 +1,15 @@
-package in.vini.request;
+package in.vini.response;
 
 import lombok.Data;
 
 @Data
-public class CwRequest {
+public class UserResponse {
 
+	private Integer cid;
 	private String name;
 	private String mail;
 	private String phno;
 	private String gender;
-	private String dob;
 	private String ssn;
+	private String accStatus;
 }
